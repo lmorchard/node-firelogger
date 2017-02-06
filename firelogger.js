@@ -40,15 +40,15 @@ module.exports = function (options) {
 
             // Patch the Vary: header to include X-FireLogger, to indicate that
             // the response changes based on its value.
-            var curr_vary = (''+res.header('Vary')),
+            var curr_vary = '' + res.get('Vary'),
                 fl_vary = 'X-FireLogger';
             if (curr_vary.indexOf(fl_vary) === -1) {
-                res.header('Vary', (curr_vary) ? (curr_vary + ',' + fl_vary) :
+                res.set('Vary', (curr_vary) ? (curr_vary + ',' + fl_vary) :
                                                  fl_vary);
             }
 
             // Do nothing if there's no X-FireLogger header
-            var fl_ver = req.header('X-FireLogger');
+            var fl_ver = req.get('X-FireLogger');
             if (!fl_ver) { return wh_next(); }
 
             // Do nothing, if there are no messages
@@ -68,11 +68,11 @@ module.exports = function (options) {
                     d_json = JSON.stringify(d_logs),
                     d_b64 = (new Buffer(d_json, 'utf-8')).toString('base64'),
                     d_re = new RegExp("(.{1," + max_header_length + "})", 'g');
-                d_lines = d_b64.match(d_re)
+                d_lines = d_b64.match(d_re);
             }
 
             for (var i=0; i<d_lines.length; i++) {
-                res.header('FireLogger-' + uid + '-' + i, d_lines[i]);
+                res.set('FireLogger-' + uid + '-' + i, d_lines[i]);
             }
 
             wh_next();
